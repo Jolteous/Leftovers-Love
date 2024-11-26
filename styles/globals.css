@@ -36,3 +36,24 @@ input, button {
   padding: 10px;
   margin-bottom: 10px;
 }
+
+.autocomplete-menu {
+  border: 1px solid #ddd;
+  max-height: 150px;
+  overflow-y: auto;
+  position: absolute;
+  background-color: white;
+  width: 100%;
+  z-index: 1000;
+  top: 100%;
+  left: 0;
+}
+
+.autocomplete-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.autocomplete-item:hover {
+  background-color: #f0f0f0;
+}

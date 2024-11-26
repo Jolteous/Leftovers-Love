@@ -1,10 +1,11 @@
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
   const [ingredients, setIngredients] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY;
@@ -43,6 +44,19 @@ export default function Home() {
     setSuggestions([]);
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setIngredients(value);
+    if (value.length > 2) {
+      const apiKey = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY;
+      fetch(`https://api.spoonacular.com/food/ingredients/autocomplete?query=${value}&number=5&apiKey=${apiKey}`)
+        .then(response => response.json())
+        .then(data => setSuggestions(Array.isArray(data) ? data : []));
+    } else {
+      setSuggestions([]);
+    }
+  };
+
   return (
     <div className="container">
       <Head>
@@ -60,22 +74,29 @@ export default function Home() {
         </section>
         <section>
           <h2>Choose your ingredients</h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
             <input
               type="text"
               value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Enter ingredients separated by commas"
+              ref={inputRef}
             />
             <button type="submit">Find Recipes</button>
+            {suggestions.length > 0 && (
+              <div className="autocomplete-menu">
+                {suggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.id}
+                    className="autocomplete-item"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </form>
-          <ul>
-            {suggestions.map((suggestion) => (
-              <li key={suggestion.id} onClick={() => handleSuggestionClick(suggestion)}>
-                {suggestion.name}
-              </li>
-            ))}
-          </ul>
         </section>
         <section className="recipe-list">
           <h2>Recipes</h2>
