@@ -83,7 +83,7 @@ export default function Home() {
             <div key={recipe.id} className="recipe">
               <h3>{recipe.title}</h3>
               <img src={recipe.image} alt={recipe.title} />
-              <p>{recipe.summary}</p>
+              <p dangerouslySetInnerHTML={{ __html: recipe.summary }}></p>
               <p>Ready in {recipe.readyInMinutes} minutes</p>
               <p>Servings: {recipe.servings}</p>
             </div>
