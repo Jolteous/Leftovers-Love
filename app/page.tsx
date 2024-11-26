@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import {ChangeEvent, FormEvent, useEffect, useState} from 'react';
 import Header from '../components/Header';
 import IngredientForm from '../components/IngredientForm';
 import RecipeList from '../components/RecipeList';
-import { Recipe, Suggestion } from '@/types';
+import {Recipe, Suggestion} from '@/types';
+import NavBar from "@/components/NavBar";
 
 export default function Home() {
   const [ingredients, setIngredients] = useState<string>('');
@@ -66,26 +67,29 @@ export default function Home() {
   };
 
   return (
-      <main className="max-w-3xl mx-auto p-5">
-        <Header />
-        <main>
-          <section className="mb-5">
-            <h2>How it works</h2>
-            <p>
-              Enter the ingredients you have, and we&#39;ll suggest recipes you can make with
-              them.
-            </p>
-          </section>
-          <IngredientForm
-              ingredients={ingredients}
-              setIngredients={setIngredients}
-              handleSubmit={handleSubmit}
-              suggestions={suggestions}
-              handleInputChange={handleInputChange}
-              handleSuggestionClick={handleSuggestionClick}
-          />
-          <RecipeList recipes={recipes} />
+      <>
+        <NavBar />
+        <main className="max-w-3xl mx-auto p-5">
+          <Header />
+          <main>
+            <section className="mb-5">
+              <h2>How it works</h2>
+              <p>
+                Enter the ingredients you have, and we&#39;ll suggest recipes you can make with
+                them.
+              </p>
+            </section>
+            <IngredientForm
+                ingredients={ingredients}
+                setIngredients={setIngredients}
+                handleSubmit={handleSubmit}
+                suggestions={suggestions}
+                handleInputChange={handleInputChange}
+                handleSuggestionClick={handleSuggestionClick}
+            />
+            <RecipeList recipes={recipes} />
+          </main>
         </main>
-      </main>
+      </>
   );
 }
