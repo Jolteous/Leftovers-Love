@@ -1,4 +1,4 @@
-import { FormEvent, useRef, ChangeEvent } from 'react';
+import {ChangeEvent, FormEvent, useRef} from 'react';
 import {Suggestion} from "@/types";
 
 interface IngredientFormProps {
@@ -12,7 +12,6 @@ interface IngredientFormProps {
 
 export default function IngredientForm({
                                            ingredients,
-                                           setIngredients,
                                            handleSubmit,
                                            suggestions,
                                            handleInputChange,

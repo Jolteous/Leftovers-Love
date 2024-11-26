@@ -41,7 +41,7 @@ export default function Auth() {
 
     useEffect(() => {
         if (status === 'authenticated') router.push('/');
-    }, [status]);
+    }, [status, router]);
 
     const handleSignIn = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -96,17 +96,23 @@ export default function Auth() {
                 description: 'Account created successfully.',
             });
             setIsAuthenticating(false);
-        } catch (error: any) {
-            if (error.name === 'ZodError') {
+        } catch (error) {
+            if (error instanceof z.ZodError) {
                 toast({
                     title: 'Validation Error',
-                    description: error.errors.map((err: any) => err.message).join(', '),
+                    description: error.errors.map((err) => err.message).join(', '),
+                    variant: 'destructive',
+                });
+            } else if (error instanceof Error) {
+                toast({
+                    title: 'Signup Failed',
+                    description: error.message,
                     variant: 'destructive',
                 });
             } else {
                 toast({
                     title: 'Signup Failed',
-                    description: error.message,
+                    description: 'An unknown error occurred',
                     variant: 'destructive',
                 });
             }
