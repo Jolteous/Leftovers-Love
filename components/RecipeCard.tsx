@@ -1,20 +1,22 @@
-import sanitizeHtml from 'sanitize-html';
-import {Recipe} from "@/types";
+import { RecipeDetail } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface RecipeCardProps {
-    recipe: Recipe;
+    recipe: RecipeDetail;
+    onClick: (recipe: RecipeDetail) => void;
 }
 
-export default function RecipeCard({ recipe }: RecipeCardProps) {
-    const sanitizedSummary = sanitizeHtml(recipe.summary);
-
+export default function RecipeCard({ recipe, onClick }: RecipeCardProps) {
     return (
-        <div className="border p-3 mb-3">
-            <h3>{recipe.title}</h3>
-            <img src={recipe.image} alt={recipe.title} className="mb-3" />
-            <p dangerouslySetInnerHTML={{ __html: sanitizedSummary }}></p>
-            <p>Ready in {recipe.readyInMinutes} minutes</p>
-            <p>Servings: {recipe.servings}</p>
-        </div>
+        <Card className="mb-4 cursor-pointer" onClick={() => onClick(recipe)}>
+            <CardHeader>
+                <CardTitle>{recipe.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <img src={recipe.image} alt={recipe.title} className="mb-3" />
+                <p>Ready in {recipe.readyInMinutes} minutes</p>
+                <p>Servings: {recipe.servings}</p>
+            </CardContent>
+        </Card>
     );
 }

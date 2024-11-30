@@ -1,20 +1,23 @@
 import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function POST(
     request: Request,
 ) {
     if (request.method !== "POST") return new Response("Oops, Invalid Method.", {
-        status: 400,
+        status: 405,
     })
 
     try {
         const json = await request.json();
 
+        const hashedPassword = await bcrypt.hash(json.password, 10)
+
         await prisma.user.create({
             data: {
                 email: json.email,
                 name: json.name,
-                password: json.password,
+                password: hashedPassword,
             }
         });
 

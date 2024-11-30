@@ -11,11 +11,25 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
-  name     String
-  password String?
-  role     Role    @default(USER)
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String
+  password    String?
+  role        Role     @default(USER)
+  ingredients String[]
+}
+
+model RecipeCache {
+  id          String   @id @default(uuid())
+  ingredients String   @unique
+  recipes     String
+  updatedAt   DateTime @updatedAt
+}
+
+model RecipeBulkCache {
+  id        String   @id
+  data      String
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

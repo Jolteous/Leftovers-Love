@@ -8,7 +8,6 @@ import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
 import {useToast} from "@/hooks/use-toast";
 import {z} from 'zod';
-import bcrypt from "bcryptjs";
 
 const signUpSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -40,7 +39,7 @@ export default function Auth() {
     const { status } = useSession();
 
     useEffect(() => {
-        if (status === 'authenticated') router.push('/');
+        if (status === 'authenticated') router.push('/home');
     }, [status, router]);
 
     const handleSignIn = (e: FormEvent<HTMLFormElement>) => {
@@ -87,9 +86,7 @@ export default function Auth() {
         try {
             signUpSchema.parse({ email, password, name });
 
-            const hashedPassword = bcrypt.hash(password, 10);
-
-            await signUp(email, await hashedPassword, name);
+            await signUp(email, password, name);
 
             toast({
                 title: 'Success',

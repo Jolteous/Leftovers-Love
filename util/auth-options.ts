@@ -1,8 +1,24 @@
 import bcrypt from "bcryptjs";
-import {AuthOptions, Session, User} from "next-auth";
+import {AuthOptions, DefaultSession, getServerSession, Session, User} from "next-auth";
 import {JWT} from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
+
+/**
+ * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
+ * object and keep type safety.
+ *
+ * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
+ */
+declare module "next-auth" {
+    interface Session extends DefaultSession {
+        user: {
+            id: string;
+            // ...other properties
+            // role: UserRole;
+        } & DefaultSession["user"];
+    }
+}
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -39,21 +55,26 @@ export const authOptions: AuthOptions = {
         })
     ],
     callbacks: {
-        async jwt({token, user}: { token: JWT; user: User }) {
+        async jwt({ token, user }: { token: JWT; user?: User }) {
             if (user) {
+                token.id = user.id;
                 token.user = user;
             }
             return token;
         },
-        async session({session, token}: { session: Session; token: JWT }) {
+        async session({ session, token }: { session: Session; token: JWT }) {
             if (token.user) {
-                session.user = token.user;
+                session.user = {
+                    ...token.user,
+                    id: token.id as string,
+                };
             }
             return session;
         },
     },
     pages: {
         signIn: "/auth",
-        signOut: "/auth",
     },
 };
+
+export const getServerAuthSession = () => getServerSession(authOptions);

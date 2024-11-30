@@ -1,95 +1,24 @@
 'use client';
 
-import {ChangeEvent, FormEvent, useEffect, useState} from 'react';
-import Header from '../components/Header';
-import IngredientForm from '../components/IngredientForm';
-import RecipeList from '../components/RecipeList';
-import {Recipe, Suggestion} from '@/types';
-import NavBar from "@/components/NavBar";
+import Link from "next/link";
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  const [ingredients, setIngredients] = useState<string>('');
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+    return (
+        <div className="min-h-screen bg-gradient-to-r from-green-100 to-blue-100 flex flex-col items-center justify-center p-4">
+            <h1 className="text-5xl font-extrabold text-gray-800 mb-4 text-center">
+                Leftovers Love
+            </h1>
 
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      const apiKey = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY;
-      if (ingredients.length > 2 && apiKey) {
-        try {
-          const response = await fetch(
-              `https://api.spoonacular.com/food/ingredients/autocomplete?query=${ingredients}&number=5&apiKey=${apiKey}`
-          );
-          if (!response.ok) {
-            throw new Error('Failed to fetch suggestions');
-          }
-          const data = await response.json();
-          setSuggestions(Array.isArray(data) ? data : []);
-        } catch (error) {
-          console.error(error instanceof Error ? error.message : error);
-        }
-      } else {
-        setSuggestions([]);
-      }
-    };
+            <p className="text-xl text-gray-600 mb-8 text-center">
+                Minimize food loss by finding new recipes
+            </p>
 
-    fetchSuggestions();
-  }, [ingredients]);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const apiKey = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY;
-    if (!apiKey) {
-      console.error('API key is missing');
-      return;
-    }
-    try {
-      const response = await fetch(
-          `https://api.spoonacular.com/recipes/complexSearch?includeIngredients=${ingredients}&number=5&addRecipeInformation=true&apiKey=${apiKey}`
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipes');
-      }
-      const data = await response.json();
-      setRecipes(Array.isArray(data.results) ? data.results : []);
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : error);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion: Suggestion) => {
-    setIngredients(suggestion.name);
-    setSuggestions([]);
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setIngredients(e.target.value);
-  };
-
-  return (
-      <>
-        <NavBar />
-        <main className="max-w-3xl mx-auto p-5">
-          <Header />
-          <main>
-            <section className="mb-5">
-              <h2>How it works</h2>
-              <p>
-                Enter the ingredients you have, and we&#39;ll suggest recipes you can make with
-                them.
-              </p>
-            </section>
-            <IngredientForm
-                ingredients={ingredients}
-                setIngredients={setIngredients}
-                handleSubmit={handleSubmit}
-                suggestions={suggestions}
-                handleInputChange={handleInputChange}
-                handleSuggestionClick={handleSuggestionClick}
-            />
-            <RecipeList recipes={recipes} />
-          </main>
-        </main>
-      </>
-  );
+            <Link href="/auth">
+                <Button variant="default" size="lg" className="px-8 py-4">
+                    Sign In
+                </Button>
+            </Link>
+        </div>
+    );
 }

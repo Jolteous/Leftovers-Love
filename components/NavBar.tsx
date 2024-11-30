@@ -12,13 +12,16 @@ import {
 import Link from 'next/link';
 import crypto from 'crypto';
 
-function NavBar() {
+export default function NavBar() {
     const { data: session } = useSession();
 
     const emailmd5 = crypto.createHash('md5').update(session?.user?.email || "null").digest('hex')
 
     return (
-        <div className="w-full h-16 flex justify-end items-center px-4">
+        <div className="w-full h-16 flex justify-between items-center px-4">
+            <Link href={"/home"} className={"text-md font-medium"}>
+                Leftovers Love
+            </Link>
             {session ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -58,5 +61,3 @@ function NavBar() {
         </div>
     );
 }
-
-export default NavBar;
