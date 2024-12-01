@@ -11,9 +11,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import crypto from 'crypto';
+import { useRouter } from 'next/navigation';
 
 export default function NavBar() {
     const { data: session } = useSession();
+    const router = useRouter();
 
     const emailmd5 = crypto.createHash('md5').update(session?.user?.email || "null").digest('hex')
 
@@ -42,7 +44,7 @@ export default function NavBar() {
                         <DropdownMenuItem onClick={() => {}}>
                             Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {}}>
+                        <DropdownMenuItem onClick={() => {router.push('/settings')}}>
                             Settings
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
