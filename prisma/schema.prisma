@@ -11,14 +11,15 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  email       String   @unique
-  name        String
-  password    String?
-  role        Role     @default(USER)
-  ingredients String[]
-  latitute    Float?
-  longitude   Float?
+  id             String   @id @default(uuid())
+  email          String   @unique
+  name           String
+  password       String?
+  role           Role     @default(USER)
+  savedRecipeIds String[]
+  ingredients    String[]
+  latitute       Float?
+  longitude      Float?
 }
 
 model RecipeCache {

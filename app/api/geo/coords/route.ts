@@ -6,5 +6,5 @@ export async function POST(request: NextRequest) {
     `https://geocode.maps.co/search?q=${address}&api_key=${process.env.GEOCODE_API_KEY}`
   );
   const data = await res.json();
-  return new NextResponse(data);
+  return NextResponse.json(data);
 }
