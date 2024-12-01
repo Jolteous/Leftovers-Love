@@ -10,12 +10,28 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import RecipeDetailModal from '@/components/RecipeDetailModal';
 import RecipeCardSkeleton from "@/components/RecipeCardSkeleton";
 
+const Collapse = ({ in: inProp, children }) => {
+    return (
+        <div className={`transition-all duration-500 ease-in-out ${inProp ? 'max-w-xs max-h-screen' : 'max-w-0 max-h-0 overflow-hidden'} bg-gray-200 p-2 rounded-md`}>
+            {children}
+        </div>
+    );
+};
+
+const getFirstTwoSentences = (text) => {
+    if (!text) return '';
+    const sentences = text.split('. ');
+    return sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '...' : '');
+};
+
 export default function Home() {
     const [recipes, setRecipes] = useState<RecipeDetail[]>([]);
     const [ingredients, setIngredients] = useState<string[]>([]);
+    const [ingredientUsage, setIngredientUsage] = useState<{ [key: string]: boolean }>({});
     const [loading, setLoading] = useState(true);
     const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetail | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [expandedRecipeId, setExpandedRecipeId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchIngredients = async () => {
@@ -29,6 +45,11 @@ export default function Home() {
                 const data = await res.json();
                 console.log(data);
                 setIngredients(data || []);
+                const usage = data.reduce((acc, ingredient) => {
+                    acc[ingredient] = true;
+                    return acc;
+                }, {});
+                setIngredientUsage(usage);
             } catch (error) {
                 console.error(error);
             }
@@ -38,16 +59,13 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        if (ingredients && ingredients.length > 0) {
+        const activeIngredients = ingredients.filter(ingredient => ingredientUsage[ingredient]);
+        if (activeIngredients.length > 0) {
             console.log('fetching');
             const fetchRecipes = async () => {
                 try {
                     setLoading(true);
-                    const filteredIngredients = ingredients.filter(ingredient => ingredient.trim() !== '');
-                    if (filteredIngredients.length === 0) {
-                        throw new Error('No ingredients provided');
-                    }
-                    const ingredientsStr = filteredIngredients.join(',');
+                    const ingredientsStr = activeIngredients.join(',');
                     const res = await fetch(
                         `/api/recipes/ingredients?ingredients=${encodeURIComponent(ingredientsStr)}`
                     );
@@ -68,7 +86,7 @@ export default function Home() {
             console.log('skipping');
             setRecipes([]);
         }
-    }, [ingredients]);
+    }, [ingredients, ingredientUsage]);
 
     const handleRecipeClick = (recipe: RecipeDetail) => {
         setSelectedRecipe(recipe);
@@ -80,10 +98,21 @@ export default function Home() {
         setSelectedRecipe(null);
     };
 
+    const handleIngredientUsageChange = (ingredient: string) => {
+        setIngredientUsage(prevUsage => ({
+            ...prevUsage,
+            [ingredient]: !prevUsage[ingredient]
+        }));
+    };
+
+    const handleExpandClick = (recipeId: string) => {
+        setExpandedRecipeId(expandedRecipeId === recipeId ? null : recipeId);
+    };
+
     return (
-        <main className="flex h-full">
+        <main className="flex h-full justify-center bg-gray-100">
             <div className="w-5/6 h-full">
-                <div className={"text-center font-extrabold text-2xl"}>
+                <div className={"text-center font-extrabold text-2xl mb-4"}>
                     Your Feed
                 </div>
                 <ScrollArea className="h-full p-4">
@@ -100,15 +129,50 @@ export default function Home() {
                     {!loading && recipes && recipes.length === 0 && <p>No recipes found.</p>}
                     {!loading &&
                         recipes.map((recipe) => (
-                            <RecipeCard key={recipe.id} recipe={recipe} onClick={handleRecipeClick} />
+                            <div key={recipe.id} className="border-4 rounded-md p-4 mb-6 bg-gray-50 relative">
+                                <div className="flex flex-col items-center">
+                                    <RecipeCard recipe={recipe} onClick={() => handleRecipeClick(recipe)} />
+                                    <button
+                                        onClick={() => handleExpandClick(recipe.id)}
+                                        className="mt-2 text-blue-500"
+                                    >
+                                        {expandedRecipeId === recipe.id ? '▲' : '▼'}
+                                    </button>
+                                    <div className="absolute top-0 right-0 mt-2 mr-2">
+                                        <Collapse in={expandedRecipeId === recipe.id}>
+                                            <div className="text-center" dangerouslySetInnerHTML={{ __html: recipe.summary ? getFirstTwoSentences(recipe.summary) : 'No summary available.' }} />
+                                        </Collapse>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                 </ScrollArea>
             </div>
             <div className="w-1/6 text-center p-4">
                 <AddIngredientsButton
-                    onIngredientsUpdated={(newIngredients: string[]) => setIngredients(newIngredients)}
+                    onIngredientsUpdated={(newIngredients: string[]) => {
+                        setIngredients(newIngredients);
+                        const usage = newIngredients.reduce((acc, ingredient) => {
+                            acc[ingredient] = true;
+                            return acc;
+                        }, {});
+                        setIngredientUsage(usage);
+                    }}
                     initialIngredients={ingredients}
                 />
+                <div className="mt-4">
+                    {ingredients.map((ingredient) => (
+                        <div key={ingredient} className="flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={ingredientUsage[ingredient]}
+                                onChange={() => handleIngredientUsageChange(ingredient)}
+                                className="mr-2"
+                            />
+                            <span>{ingredient}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {selectedRecipe && (
