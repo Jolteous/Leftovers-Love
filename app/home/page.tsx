@@ -43,7 +43,11 @@ export default function Home() {
             const fetchRecipes = async () => {
                 try {
                     setLoading(true);
-                    const ingredientsStr = ingredients.join(',');
+                    const filteredIngredients = ingredients.filter(ingredient => ingredient.trim() !== '');
+                    if (filteredIngredients.length === 0) {
+                        throw new Error('No ingredients provided');
+                    }
+                    const ingredientsStr = filteredIngredients.join(',');
                     const res = await fetch(
                         `/api/recipes/ingredients?ingredients=${encodeURIComponent(ingredientsStr)}`
                     );
