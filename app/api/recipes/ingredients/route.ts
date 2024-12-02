@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         const response = await fetch(
             `https://api.spoonacular.com/recipes/complexSearch?includeIngredients=${encodeURIComponent(
                 ingredients
-            )}&number=5&apiKey=${apiKey}&instructionsRequired=true&addRecipeInformation=true&sort=max-used-ingredients`
+            )}&number=5&apiKey=${apiKey}&instructionsRequired=true&addRecipeInformation=true&sort=max-used-ingredients&fillIngredients=true`
         );
 
 
