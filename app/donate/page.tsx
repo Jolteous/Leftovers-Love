@@ -1,6 +1,5 @@
 "use client";
-
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import Plot  from "react-plotly.js";
 
 import foodbanks from "@/data/foodbanks.json";
 
@@ -52,23 +51,36 @@ export default function Donate() {
             <div className="h-8 bg-gray-300 animate-pulse"></div>
           </div>
         ) : (
-          <MapContainer
-            center={[latitude, longitude]}
-            zoom={13}
-          >
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {foodbanks.map((foodbank) => (
-              <Marker position={[foodbank.latitude, foodbank.longitude]} key={foodbank.name}>
-                <Popup>
-                  <div>
-                    <div className="font-bold">{foodbank.name}</div>
-                    <div>{foodbank.address}</div>
-                    <div>{foodbank.phone}</div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+          // Plot food banks on map
+          <Plot
+            data={[
+              {
+                type: "scattermapbox",
+                lat: foodbanks.map((fb) => fb.latitude),
+                lon: foodbanks.map((fb) => fb.longitude),
+                mode: "markers",
+                marker: {
+                  size: 14,
+                  color: "blue",
+                },
+                text: foodbanks.map((fb) => `${fb.name}<br>${fb.address}<br>${fb.phone}`),
+              },
+            ]}
+            layout={{
+              autosize: true,
+              mapbox: {
+                style: "open-street-map",
+                center: {
+                  lat: latitude,
+                  lon: longitude,
+                },
+                zoom: 12,
+              },
+              margin: { t: 0, b: 0, l: 0, r: 0 },
+            }}
+            config={{ displayModeBar: false }}
+            style={{ width: "100%", height: "500px" }}
+          />
         )}
     </main>
   );
