@@ -1,0 +1,51 @@
+[
+    {
+        "name": "The Peace Haven",
+        "address": "1063 A St, Hayward, CA 94541",
+        "longitude": -122.082,
+        "latitude": 37.668,
+        "phone": "(510) 581-4060"
+    },
+    {
+        "name": "Eden Area Food Pantry",
+        "address": "409 Jackson St, Hayward, CA 94544",
+        "longitude": -122.098,
+        "latitude": 37.666,
+        "phone": "(510) 886-6313"
+    },
+    {
+        "name": "South Hayward Parish",
+        "address": "27287 Patrick Ave, Hayward, CA 94544",
+        "longitude": -122.084,
+        "latitude": 37.634,
+        "phone": "(510) 785-3663"
+    },
+    {
+        "name": "Davis Street Family Resource Center",
+        "address": "3081 Teagarden St, San Leandro, CA 94577",
+        "longitude": -122.155,
+        "latitude": 37.713,
+        "phone": "(510) 347-4620"
+    },
+    {
+        "name": "Alameda County Community Food Bank",
+        "address": "7900 Edgewater Dr, Oakland, CA 94621",
+        "longitude": -122.207,
+        "latitude": 37.739,
+        "phone": "(510) 635-3663"
+    },
+    {
+        "name": "St. Vincent de Paul",
+        "address": "675 23rd St, Richmond, CA 94804",
+        "longitude": -122.344,
+        "latitude": 37.916,
+        "phone": "(510) 234-5714"
+    },
+    {
+        "name": "Richmond Emergency Food Pantry",
+        "address": "2369 Barrett Ave, Richmond, CA 94804",
+        "longitude": -122.344,
+        "latitude": 37.935,
+        "phone": "(510) 235-9732"
+    }
+]
