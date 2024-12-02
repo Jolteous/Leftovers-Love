@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 
-const AddIngredientsButton = ({ onIngredientsUpdated, initialIngredients }) => {
-    const [ingredients, setIngredients] = useState(initialIngredients);
+interface AddIngredientsButtonProps {
+    onIngredientsUpdated: (ingredients: string[]) => void;
+    initialIngredients: string[];
+}
 
-    const handleAddIngredient = (newIngredient) => {
-        setIngredients((prevIngredients) => {
+const AddIngredientsButton: React.FC<AddIngredientsButtonProps> = ({ onIngredientsUpdated, initialIngredients }) => {
+    const [ingredients, setIngredients] = useState<string[]>(initialIngredients);
+
+    const handleAddIngredient = (newIngredient: string) => {
+        setIngredients((prevIngredients: string[]) => {
             const updatedIngredients = [...prevIngredients, newIngredient];
             onIngredientsUpdated(updatedIngredients);
             return updatedIngredients;
@@ -13,7 +18,7 @@ const AddIngredientsButton = ({ onIngredientsUpdated, initialIngredients }) => {
 
     return (
         <div>
-            {ingredients.map((ingredient, index) => (
+            {ingredients.map((ingredient: string, index: number) => (
                 <div key={index}>{ingredient}</div>
             ))}
             <button onClick={() => handleAddIngredient('New Ingredient')}>Add Ingredient</button>

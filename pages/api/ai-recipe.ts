@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import fetch from 'node-fetch';
+import fetch, { RequestInit as NodeFetchRequestInit } from 'node-fetch';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 5000; // 5 seconds
 
-async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
+async function fetchWithRetry(url: string, options: NodeFetchRequestInit, retries = MAX_RETRIES) {
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
@@ -23,12 +23,16 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
             }
         }
         return response;
-    } catch (error) {
-        throw new Error(`Fetch failed: ${error.message}`);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            throw new Error(`Fetch failed: ${error.message}`);
+        } else {
+            throw new Error('Fetch failed: Unknown error');
+        }
     }
 }
 
-async function generateRecipeText(ingredients, retries = MAX_RETRIES) {
+async function generateRecipeText(ingredients: string[], retries = MAX_RETRIES) {
     const textGenerationResponse = await fetchWithRetry('https://api-inference.huggingface.co/models/Qwen/QwQ-32B-Preview', {
         method: 'POST',
         headers: {
@@ -44,7 +48,7 @@ async function generateRecipeText(ingredients, retries = MAX_RETRIES) {
         }),
     });
 
-    const textData = await textGenerationResponse.json();
+    const textData = await textGenerationResponse.json() as { generated_text: string }[];
     console.log('Text generation response:', textData);
 
     const recipeText = textData[0]?.generated_text;
@@ -71,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const recipeText = await generateRecipeText(ingredients);
 
             // Extract title, summary, and instructions from the generated text
-            const [title, summary, ...instructionsArray] = recipeText.split('\n').filter(line => line.trim() !== '');
+            const [title, summary, ...instructionsArray] = recipeText.split('\n').filter((line: string) => line.trim() !== '');
             const instructions = instructionsArray.join('\n');
 
             // Image Generation using Pollinations API
@@ -89,9 +93,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             };
 
             res.status(200).json(aiRecipe);
-        } catch (error) {
-            console.error('Error generating AI recipe:', error);
-            res.status(500).json({ error: 'Failed to generate AI recipe', details: error.message });
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Error generating AI recipe:', error);
+                res.status(500).json({ error: 'Failed to generate AI recipe', details: error.message });
+            } else {
+                res.status(500).json({ error: 'Failed to generate AI recipe', details: 'Unknown error' });
+            }
         }
     } else {
         res.setHeader('Allow', ['POST']);
