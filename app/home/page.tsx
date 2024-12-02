@@ -20,7 +20,7 @@ export default function Home() {
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetail | null>(
       null
   );
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);  
   const [aiRecipe, setAiRecipe] = useState<RecipeDetail | null>(null);
   const [aiLoading, setAiLoading] = useState(true);
   const [savedRecipeIds, setSavedRecipeIds] = useState<string[]>([]);
@@ -85,7 +85,7 @@ export default function Home() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ ingredients: activeIngredients }),
+            body: JSON.stringify({ ingredients: activeIngredients, ensureCompleteInstructions: true, maxTokens: 2048 }),
           });
           if (!res.ok) {
             const errorData = await res.json();
@@ -227,7 +227,7 @@ export default function Home() {
                         <AccordionContent>
                           <div className="text-center mt-2">
                             <h4 className="font-bold">Instructions</h4>
-                            <p className={"whitespace-pre-line"}>{aiRecipe.instructions}</p>
+                            <p className={"whitespace-pre-line break-words overflow-visible"} style={{ maxHeight: 'none' }}>{aiRecipe.instructions}</p>
                           </div>
                         </AccordionContent>
                       </AccordionItem>
