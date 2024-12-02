@@ -66,9 +66,10 @@ export default function Home() {
           throw new Error("Failed to fetch ingredients");
         }
         const data = await res.json();
-        console.log(data);
-        setIngredients(data || []);
-        const usage = data.reduce((acc, ingredient) => {
+        const filteredData = data.filter(ingredient => ingredient.trim() !== '');
+        console.log(filteredData);
+        setIngredients(filteredData || []);
+        const usage = filteredData.reduce((acc, ingredient) => {
           acc[ingredient] = true;
           return acc;
         }, {});
@@ -254,8 +255,9 @@ export default function Home() {
       <div className="w-1/6 text-center p-4">
         <AddIngredientsButton
           onIngredientsUpdated={(newIngredients: string[]) => {
-            setIngredients(newIngredients);
-            const usage = newIngredients.reduce((acc, ingredient) => {
+            const filteredIngredients = newIngredients.filter(ingredient => ingredient.trim() !== '');
+            setIngredients(filteredIngredients);
+            const usage = filteredIngredients.reduce((acc, ingredient) => {
               acc[ingredient] = true;
               return acc;
             }, {});
