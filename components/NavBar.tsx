@@ -36,6 +36,9 @@ export default function NavBar() {
             <Link href={"/favorites"} className="text-md font-medium">
               Favorites
             </Link>
+            <Link href={"/donate"} className="text-md font-medium">
+              Donate
+            </Link>
           </div>
 
           <DropdownMenu>
