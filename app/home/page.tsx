@@ -161,6 +161,8 @@ export default function Home() {
     setExpandedRecipeId(expandedRecipeId === recipeId ? null : recipeId);
   };
 
+  const noIngredients = ingredients.length === 0 || ingredients.every(ingredient => !ingredientUsage[ingredient]);
+
   return (
     <main className="flex h-full justify-center bg-gray-100">
       <div className="w-5/6 h-full">
@@ -175,13 +177,13 @@ export default function Home() {
               ))}
             </>
           )}
-          {!loading && (!ingredients || ingredients.length === 0) && (
+          {!loading && noIngredients && (
             <p>Please add ingredients to get recipe suggestions.</p>
           )}
-          {!loading && recipes && recipes.length === 0 && (
+          {!loading && recipes && recipes.length === 0 && !noIngredients && (
             <p>No recipes found.</p>
           )}
-          {!loading && aiLoading && (
+          {!loading && aiLoading && !noIngredients && (
             <div className="border-4 rounded-md p-4 mb-6 bg-purple-100 relative">
               <div className="flex flex-col items-center">
                 <RecipeCardSkeleton />
@@ -189,7 +191,7 @@ export default function Home() {
               </div>
             </div>
           )}
-          {!loading && !aiLoading && aiRecipe && (
+          {!loading && !aiLoading && aiRecipe && !noIngredients && (
             <div className="border-4 rounded-md p-4 mb-6 bg-gray-50 relative border-purple-200">
               <div className="flex flex-col items-center p-4 rounded-md">
                 <img src={aiRecipe.image} alt="AI Generated Recipe" className="w-1/4 h-auto" />
@@ -210,14 +212,14 @@ export default function Home() {
               </div>
             </div>
           )}
-          {!loading && !aiLoading && !aiRecipe && (
+          {!loading && !aiLoading && !aiRecipe && !noIngredients && (
             <div className="border-4 rounded-md p-4 mb-6 bg-red-100 relative">
               <div className="flex flex-col items-center">
                 <span className="text-red-700 font-bold">Failed to generate AI recipe</span>
               </div>
             </div>
           )}
-          {!loading &&
+          {!loading && !noIngredients &&
             recipes.map((recipe) => (
               <div
                 key={recipe.id}
@@ -260,6 +262,7 @@ export default function Home() {
             setIngredientUsage(usage);
           }}
           initialIngredients={ingredients}
+          className={noIngredients ? "border-2 border-red-500" : ""}
         />
         <div className="mt-4">
           {ingredients.map((ingredient) => (
