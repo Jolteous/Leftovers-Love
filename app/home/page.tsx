@@ -190,10 +190,10 @@ export default function Home() {
             </div>
           )}
           {!loading && !aiLoading && aiRecipe && (
-            <div className="border-4 rounded-md p-4 mb-6 bg-gray-50 relative">
-              <div className="flex flex-col items-center bg-purple-100 p-4 rounded-md">
+            <div className="border-4 rounded-md p-4 mb-6 bg-gray-50 relative border-purple-200">
+              <div className="flex flex-col items-center p-4 rounded-md">
                 <img src={aiRecipe.image} alt="AI Generated Recipe" className="w-1/4 h-auto" />
-                <p className="text-gray-700">{aiRecipe.summary}</p>
+                <p className="text-gray-700 whitespace-pre-line">{aiRecipe.summary}</p>
                 <button
                   onClick={() => handleExpandClick(aiRecipe.id)}
                   className="mt-2 text-blue-500"
@@ -203,9 +203,10 @@ export default function Home() {
                 <Accordion in={expandedRecipeId === aiRecipe.id}>
                   <div className="text-center mt-2">
                     <h4 className="font-bold">Instructions</h4>
-                    <p>{aiRecipe.instructions}</p>
+                    <p className="whitespace-pre-line">{aiRecipe.instructions}</p>
                   </div>
                 </Accordion>
+                <span className="absolute bottom-2 right-2 bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs">AI</span>
               </div>
             </div>
           )}

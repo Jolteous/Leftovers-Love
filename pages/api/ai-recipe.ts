@@ -38,7 +38,7 @@ async function generateRecipeText(ingredients, retries = MAX_RETRIES) {
         body: JSON.stringify({
             inputs: `Create a detailed recipe using the following ingredients: ${ingredients.join(', ')}. Provide a title, summary, and step-by-step instructions.`,
             parameters: {
-                max_new_tokens: 200,
+                max_new_tokens: 500, // Increase the token limit
                 return_full_text: false,
             },
         }),
@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const instructions = instructionsArray.join('\n');
 
             // Image Generation using Pollinations API
-            const imagePrompt = `A delicious dish made with ${ingredients.join(', ')}`;
+            const imagePrompt = `${title} - A delicious dish made with ${ingredients.join(', ')}`;
             const imageUrlResponse = await fetch(`https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`);
             const imageUrl = imageUrlResponse.url;
 
