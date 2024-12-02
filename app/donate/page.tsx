@@ -3,12 +3,12 @@ import Plot  from "react-plotly.js";
 
 import foodbanks from "@/data/foodbanks.json";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect} from "react";
 
 export default function Donate() {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFoodBanks = async () => {
@@ -22,15 +22,6 @@ export default function Donate() {
       console.log(data);
       setLongitude(data.longitude);
       setLatitude(data.latitute);
-
-      const results = await fetch("/api/foodbanks/nearby", {
-        method: "POST",
-        body: JSON.stringify({
-          latitude: data.latitute,
-          longitude: data.longitude,
-        }),
-      });
-      const foodbanks = await results.json();
     };
 
     setLoading(false);

@@ -11,11 +11,6 @@ export default function RecipePage() {
   const params = useParams();
   const id = params?.id as string | undefined;
 
-  if (!id) {
-    notFound();
-    return null;
-  }
-
   const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 

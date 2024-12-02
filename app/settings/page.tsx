@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -9,7 +8,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [originalEmail, setOriginalEmail] = useState<string | null>(null);
+  const [, setOriginalEmail] = useState<string | null>(null);
   const [originalLatitute, setOriginalLatitute] = useState<string | null>(null);
   const [originalLongitude, setOriginalLongitude] = useState<string | null>(
     null
