@@ -2,7 +2,7 @@ import { getServerAuthSession } from "@/util/auth-options";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerAuthSession();
   if (!session) {
     return new NextResponse("Not Authorized", { status: 401 });
