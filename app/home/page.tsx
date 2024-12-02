@@ -193,7 +193,6 @@ export default function Home() {
             <div className="border-4 rounded-md p-4 mb-6 bg-gray-50 relative">
               <div className="flex flex-col items-center bg-purple-100 p-4 rounded-md">
                 <img src={aiRecipe.image} alt="AI Generated Recipe" className="w-1/4 h-auto" />
-                <h3 className="text-xl font-bold">{aiRecipe.title}</h3>
                 <p className="text-gray-700">{aiRecipe.summary}</p>
                 <button
                   onClick={() => handleExpandClick(aiRecipe.id)}

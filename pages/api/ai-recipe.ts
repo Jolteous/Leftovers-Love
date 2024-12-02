@@ -28,36 +28,47 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
     }
 }
 
+async function generateRecipeText(ingredients, retries = MAX_RETRIES) {
+    const textGenerationResponse = await fetchWithRetry('https://api-inference.huggingface.co/models/Qwen/QwQ-32B-Preview', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+        },
+        body: JSON.stringify({
+            inputs: `Create a detailed recipe using the following ingredients: ${ingredients.join(', ')}. Provide a title, summary, and step-by-step instructions.`,
+            parameters: {
+                max_new_tokens: 200,
+                return_full_text: false,
+            },
+        }),
+    });
+
+    const textData = await textGenerationResponse.json();
+    console.log('Text generation response:', textData);
+
+    const recipeText = textData[0]?.generated_text;
+
+    if (!recipeText || recipeText.includes(`Create a detailed recipe using the following ingredients: ${ingredients.join(', ')}`)) {
+        if (retries > 0) {
+            console.log(`Retrying text generation... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            return generateRecipeText(ingredients, retries - 1);
+        } else {
+            throw new Error('Generated text is invalid or just the prompt');
+        }
+    }
+
+    return recipeText;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         try {
             const { ingredients } = req.body;
 
-            // Text Generation using Hugging Face Transformers API
-            const textGenerationResponse = await fetchWithRetry('https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-                },
-                body: JSON.stringify({
-                    inputs: `Create a detailed recipe using the following ingredients: ${ingredients.join(', ')}. Provide a title, summary, and step-by-step instructions.`,
-                    parameters: {
-                        max_new_tokens: 200,
-                        return_full_text: false,
-                    },
-                }),
-            });
-
-            const textData = await textGenerationResponse.json();
-            console.log('Text generation response:', textData);
-
-            const recipeText = textData[0]?.generated_text;
-
-            if (!recipeText) {
-                console.error('Text generation response:', textData);
-                throw new Error('Generated text is undefined');
-            }
+            // Generate recipe text
+            const recipeText = await generateRecipeText(ingredients);
 
             // Extract title, summary, and instructions from the generated text
             const [title, summary, ...instructionsArray] = recipeText.split('\n').filter(line => line.trim() !== '');
@@ -65,7 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             // Image Generation using Pollinations API
             const imagePrompt = `A delicious dish made with ${ingredients.join(', ')}`;
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
+            const imageUrlResponse = await fetch(`https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`);
+            const imageUrl = imageUrlResponse.url;
 
             const aiRecipe = {
                 id: 'ai-recipe',
