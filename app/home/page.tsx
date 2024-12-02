@@ -1,4 +1,4 @@
-// /app/page.tsx or /pages/index.tsx
+// /app/page.tsx
 
 "use client";
 
@@ -16,6 +16,18 @@ const Collapse = ({ in: inProp, children }) => {
       className={`transition-all duration-500 ease-in-out ${
         inProp ? "max-w-xs max-h-screen" : "max-w-0 max-h-0 overflow-hidden"
       } bg-gray-200 p-2 rounded-md`}
+    >
+      {children}
+    </div>
+  );
+};
+
+const Accordion = ({ in: inProp, children }) => {
+  return (
+    <div
+      className={`transition-max-height duration-500 ease-in-out ${
+        inProp ? "max-h-screen" : "max-h-0"
+      } overflow-hidden`}
     >
       {children}
     </div>
@@ -41,6 +53,8 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedRecipeId, setExpandedRecipeId] = useState<string | null>(null);
   const [savedRecipeIds, setSavedRecipeIds] = useState<string[]>([]);
+  const [aiRecipe, setAiRecipe] = useState<RecipeDetail | null>(null);
+  const [aiLoading, setAiLoading] = useState(true);
 
   useEffect(() => {
     const fetchIngredients = async () => {
@@ -94,7 +108,32 @@ export default function Home() {
         }
       };
 
+      const fetchAiRecipe = async () => {
+        try {
+          setAiLoading(true);
+          const res = await fetch("/api/ai-recipe", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ingredients: activeIngredients }),
+          });
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error('AI recipe fetch error data:', errorData);
+            throw new Error(`Failed to fetch AI recipe: ${errorData.error} - ${errorData.details}`);
+          }
+          const data = await res.json();
+          setAiRecipe(data);
+        } catch (error) {
+          console.error("Error fetching AI recipe:", error);
+        } finally {
+          setAiLoading(false);
+        }
+      };
+
       fetchRecipes();
+      fetchAiRecipe();
     } else {
       console.log("skipping");
       setRecipes([]);
@@ -104,42 +143,6 @@ export default function Home() {
   const handleRecipeClick = (recipe: RecipeDetail) => {
     setSelectedRecipe(recipe);
     setIsModalOpen(true);
-  };
-
-  useEffect(() => {
-    const fetchSavedRecipes = async () => {
-      try {
-        const res = await fetch("/api/favorites/get", {
-          method: "GET",
-        });
-        if (!res.ok) {
-          throw new Error("Failed to fetch saved recipes");
-        }
-        const data = await res.json();
-        setSavedRecipeIds(data || []);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchSavedRecipes();
-  }, []);
-
-  const handleSave = async (recipeId: string) => {
-    try {
-      const res = await fetch("/api/favorites/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ recipeId: recipeId.toString() }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save recipe");
-      }
-      setSavedRecipeIds((savedRecipeIds) => [...savedRecipeIds, recipeId.toString()]);
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const closeModal = () => {
@@ -178,6 +181,42 @@ export default function Home() {
           {!loading && recipes && recipes.length === 0 && (
             <p>No recipes found.</p>
           )}
+          {!loading && aiLoading && (
+            <div className="border-4 rounded-md p-4 mb-6 bg-purple-100 relative">
+              <div className="flex flex-col items-center">
+                <RecipeCardSkeleton />
+                <span className="text-purple-700 font-bold">AI Generated</span>
+              </div>
+            </div>
+          )}
+          {!loading && !aiLoading && aiRecipe && (
+            <div className="border-4 rounded-md p-4 mb-6 bg-gray-50 relative">
+              <div className="flex flex-col items-center bg-purple-100 p-4 rounded-md">
+                <img src={aiRecipe.image} alt="AI Generated Recipe" className="w-1/4 h-auto" />
+                <h3 className="text-xl font-bold">{aiRecipe.title}</h3>
+                <p className="text-gray-700">{aiRecipe.summary}</p>
+                <button
+                  onClick={() => handleExpandClick(aiRecipe.id)}
+                  className="mt-2 text-blue-500"
+                >
+                  {expandedRecipeId === aiRecipe.id ? "▲" : "▼"}
+                </button>
+                <Accordion in={expandedRecipeId === aiRecipe.id}>
+                  <div className="text-center mt-2">
+                    <h4 className="font-bold">Instructions</h4>
+                    <p>{aiRecipe.instructions}</p>
+                  </div>
+                </Accordion>
+              </div>
+            </div>
+          )}
+          {!loading && !aiLoading && !aiRecipe && (
+            <div className="border-4 rounded-md p-4 mb-6 bg-red-100 relative">
+              <div className="flex flex-col items-center">
+                <span className="text-red-700 font-bold">Failed to generate AI recipe</span>
+              </div>
+            </div>
+          )}
           {!loading &&
             recipes.map((recipe) => (
               <div
@@ -195,29 +234,16 @@ export default function Home() {
                   >
                     {expandedRecipeId === recipe.id ? "▲" : "▼"}
                   </button>
-                  <button
-                    className={`${
-                      savedRecipeIds.includes(recipe.id.toString())
-                        ? "bg-gray-400"
-                        : "bg-black"
-                    } text-white px-2 py-1 rounded`}
-                    disabled={savedRecipeIds.includes(recipe.id.toString())}
-                    onClick={() => handleSave(recipe.id)}
-                  >
-                    {savedRecipeIds.includes(recipe.id.toString()) ? "Saved" : "Save"}
-                  </button>
-                  <div className="absolute top-0 right-0 mt-2 mr-2">
-                    <Collapse in={expandedRecipeId === recipe.id}>
-                      <div
-                        className="text-center"
-                        dangerouslySetInnerHTML={{
-                          __html: recipe.summary
-                            ? getFirstTwoSentences(recipe.summary)
-                            : "No summary available.",
-                        }}
-                      />
-                    </Collapse>
-                  </div>
+                  <Accordion in={expandedRecipeId === recipe.id}>
+                    <div
+                      className="text-center mt-2"
+                      dangerouslySetInnerHTML={{
+                        __html: recipe.summary
+                          ? getFirstTwoSentences(recipe.summary)
+                          : "No summary available.",
+                      }}
+                    />
+                  </Accordion>
                 </div>
               </div>
             ))}
